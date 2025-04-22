@@ -69,6 +69,23 @@ void matrix_mul_parallel(int r[N * N], int a[N * N], int b[N * N])
     }
 }
 
+void matrix_mul_reduction(int r[N * N], int a[N * N], int b[N * N])
+{
+#pragma acc parallel loop collapse reduction(+, sum)
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < N; j++)
+        {
+            int sum = 0;
+            for (int k = 0; k < N; k++)
+            {
+                sum += a[i * N + k] * b[k * N + j];
+            }
+            r[i * N + j] = sum;
+        }
+    }
+}
+
 int get_matrix(int result[N * N], int min, int max)
 {
     int range = max - min + 1;
