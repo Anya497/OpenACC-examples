@@ -1,6 +1,5 @@
 #include <iostream>
 #include <math.h>
-#include <algorithm>
 using namespace std;
 
 const int N = 1000;
@@ -52,26 +51,9 @@ void matrix_mul_kernels(int r[N * N], int a[N * N], int b[N * N])
     }
 }
 
-void matrix_mul_parallel(int r[N * N], int a[N * N], int b[N * N])
+void matrix_mul_parallel_loop(int r[N * N], int a[N * N], int b[N * N])
 {
-#pragma acc parallel
-    for (int i = 0; i < N; i++)
-    {
-        for (int j = 0; j < N; j++)
-        {
-            int sum = 0;
-            for (int k = 0; k < N; k++)
-            {
-                sum += a[i * N + k] * b[k * N + j];
-            }
-            r[i * N + j] = sum;
-        }
-    }
-}
-
-void matrix_mul_reduction(int r[N * N], int a[N * N], int b[N * N])
-{
-#pragma acc parallel loop collapse reduction(+, sum)
+#pragma acc parallel loop collapse(2)
     for (int i = 0; i < N; i++)
     {
         for (int j = 0; j < N; j++)
@@ -118,8 +100,8 @@ int main(int argc, char **argv)
     clock_t end_kernels = clock();
     printf("Time for kernels: %ld sec \n", (end_kernels - start_kernels) / CLOCKS_PER_SEC);
 
-    clock_t start_parallel = clock();
-    matrix_mul_parallel(r, a, b);
-    clock_t end_parallel = clock();
-    printf("Time for parallel: %ld sec \n", (end_parallel - start_parallel) / CLOCKS_PER_SEC);
+    clock_t start_parallel_loop = clock();
+    matrix_mul_parallel_loop(r, a, b);
+    clock_t end_parallel_loop = clock();
+    printf("Time for kernels: %ld sec \n", (end_parallel_loop - start_parallel_loop) / CLOCKS_PER_SEC);
 }
